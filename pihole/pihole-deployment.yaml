@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pihole
+  name: pihole
+  namespace: pihole
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: pihole
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: pihole
+        name: pihole
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: WEB_PORT
+          value: "80"
+        - name: VIRTUAL_HOST
+          value: pi.hole
+        - name: WEBPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: pihole-secret
+        - name: TZ
+          value: Europe/Bucharest
+        - name: PIHOLE_DNS_
+          value: 8.8.8.8;8.8.4.4;208.67.222.222;208.67.220.220;1.1.1.1;1.0.0.1
+        image: pihole/pihole:2024.07.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /admin
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: pihole
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 80
+        - name: https
+          protocol: TCP
+          containerPort: 443
+        - name: dns
+          protocol: TCP
+          containerPort: 53
+        - name: dns-udp
+          protocol: UDP
+          containerPort: 53
+        - name: client-udp
+          protocol: UDP
+          containerPort: 67
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /admin
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources: {}
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/pihole
+          name: config
+          subPath: etc/pihole
+        - mountPath: /etc/dnsmasq.d
+          name: config
+          subPath: etc/dnsmasq.d
+      dnsConfig:
+        nameservers:
+        - 127.0.0.1
+        - 8.8.8.8
+      dnsPolicy: None
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: pihole
