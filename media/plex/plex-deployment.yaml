@@ -24,7 +24,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: plex
-        image: linuxserver/plex:arm64v8-1.40.4
+        image: linuxserver/plex:arm64v8-1.41.3
         env:
           - name: PUID
             value: "1000"
