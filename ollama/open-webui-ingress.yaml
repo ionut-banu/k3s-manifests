@@ -2,17 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: ollama
-  name: ollama-ingress
+  name: open-webui-ingress
 spec:
   ingressClassName: nginx
   rules:
-  - host: ollama.192.168.0.240.nip.io
+  - host: open-webui.192.168.0.240.nip.io
     http:
       paths:
       - pathType: Prefix
         path: /
         backend:
           service:
-            name: ollama
+            name: open-webui
             port:
-              number: 11434
+              name: http

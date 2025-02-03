@@ -8,17 +8,21 @@ metadata:
 spec:
   selector:
     matchLabels:
-      name: ollama
+      app: ollama
   template:
     metadata:
       labels:
-        name: ollama
+        app: ollama
     spec:
       nodeSelector:
         kubernetes.io/hostname: pimaster
       containers:
         - name: ollama
           image: ollama/ollama:0.5.7
+          ports:
+            - name: api
+              containerPort: 11434
+              protocol: TCP
           volumeMounts:
             - mountPath: /root/.ollama
               name: ollama
