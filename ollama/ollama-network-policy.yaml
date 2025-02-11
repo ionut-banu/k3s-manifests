@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ollama-network-policy
+  namespace: ollama
+spec:
+  podSelector:
+    matchLabels:
+      app: ollama
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from within the namespace (from the service and ingress)
+    - from:
+        - namespaceSelector: {}
+  egress:
+    # Allow DNS traffic (for resolving internal service names if needed)
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.0/12  # Allow DNS traffic
+    # Allow communication within the cluster
+    - to:
+        - namespaceSelector: {}
+    # Deny all other egress traffic (implicit default deny)
