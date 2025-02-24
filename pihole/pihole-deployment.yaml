@@ -25,22 +25,35 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-      - env:
-        - name: WEB_PORT
+      - name: pihole
+        image: pihole/pihole:2025.02.3
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PIHOLE_UID
+          value: "1000"
+        - name: PIHOLE_GID
+          value: "1000"
+        - name: FTLCONF_webserver_port
           value: "80"
-        - name: VIRTUAL_HOST
-          value: pi.hole
-        - name: WEBPASSWORD
+        - name: FTLCONF_webserver_api_password
           valueFrom:
             secretKeyRef:
               key: password
               name: pihole-secret
         - name: TZ
           value: Europe/Bucharest
-        - name: PIHOLE_DNS_
+        - name: FTLCONF_dns_upstreams
           value: 8.8.8.8;8.8.4.4;208.67.222.222;208.67.220.220;1.1.1.1;1.0.0.1
-        image: pihole/pihole:2025.02.3
-        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /admin
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
         livenessProbe:
           failureThreshold: 10
           httpGet:
@@ -51,7 +64,6 @@ spec:
           periodSeconds: 20
           successThreshold: 1
           timeoutSeconds: 10
-        name: pihole
         ports:
         - name: http
           protocol: TCP
@@ -68,16 +80,6 @@ spec:
         - name: client-udp
           protocol: UDP
           containerPort: 67
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /admin
-            port: http
-            scheme: HTTP
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
         resources: {}
         securityContext:
           privileged: false
