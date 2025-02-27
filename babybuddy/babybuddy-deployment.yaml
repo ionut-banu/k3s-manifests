@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: babybuddy
+  labels:
+    app: babybuddy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: babybuddy
+  template:
+    metadata:
+      labels:
+        app: babybuddy
+    spec:
+      containers:
+        - name: babybuddy
+          image: lscr.io/linuxserver/babybuddy:2.7.1
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Bucharest
+            - name: CSRF_TRUSTED_ORIGINS
+              value: "http://127.0.0.1:8000,https://babybuddy.192.168.0.240.nip.io"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+      restartPolicy: Always
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: babybuddy
