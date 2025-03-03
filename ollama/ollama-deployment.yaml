@@ -18,7 +18,7 @@ spec:
         kubernetes.io/hostname: pimaster
       containers:
         - name: ollama
-          image: ollama/ollama:0.5.7
+          image: ollama/ollama:0.5.12
           ports:
             - name: api
               containerPort: 11434
@@ -27,7 +27,7 @@ spec:
             - mountPath: /root/.ollama
               name: ollama
         - name: open-webui
-          image: ghcr.io/open-webui/open-webui:main
+          image: ghcr.io/open-webui/open-webui:v0.5.18
           ports:
             - name: http
               containerPort: 8080
